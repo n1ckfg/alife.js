@@ -1,0 +1,24 @@
+{
+  "name": "alife",
+  "version": "0.0.1",
+  "description": "JS toolkit for exploring artificial life models'",
+  "main": "alife.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/worldmaking/alife.js.git"
+  },
+  "keywords": [
+    "artificial",
+    "life",
+    "html5"
+  ],
+  "author": "Graham Wakefield, Alice Lab",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/worldmaking/alife.js/issues"
+  },
+  "homepage": "https://github.com/worldmaking/alife.js#readme"
+}
