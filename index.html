@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>Alife.js example</title>
+	</head>
+
+	<body>
+		<script src="alife.min.js"></script>
+		<script>
+			"use strict";
+
+			// Template page for developing minimal artificial life simulations
+			// see http://alicelab.world/digm5950/labs.html for more documentation
+
+			// global declarations here
+			const numAgents = 1000;
+			const depositChance = 0.89;
+			const drawAgents = false;
+			const deathCounter = 1000;
+
+			let sugar, center;
+			let agents = [];
+
+			function cloudy(x, y) {
+				return random();
+			}
+
+			function mountain(x, y) {
+				let p = new vec2(x/sugar.width, y/sugar.height);
+				let d = p.distance(center);
+				return 1-d;
+			}
+
+			function cloudymountain(x, y) {
+				return mountain(x, y) * cloudy(x, y);
+			}
+
+			class Agent {
+				
+				constructor() {
+					this.pos = new vec2(0.5, 0.5);
+					this.vel = new vec2(0.1, 0);
+					this.size = 0.03;
+					this.sense = 0;
+					this.memory = 0;
+					this.turnfactor = 0.1;
+					this.movefactor = 0.2;
+					this.depositor = random() < depositChance;
+					this.lifetime = 0;
+				}
+				
+			}
+
+			// called at start, and whenever Enter key is pressed:
+			function reset() {
+				sugar = new field2D(256);
+				center = new vec2(0.5, 0.5);
+				sugar.set(cloudymountain);
+				sugar.diffuse(sugar.clone(), sugar.width, 50);
+				sugar.normalize();
+				
+				// (re)initialization here
+				agents = [];
+				for (let i=0; i<numAgents; i++) {
+					agents.push(new Agent());
+				}	
+
+			}
+
+			// called before rendering each frame
+			// dt is the time in seconds since the last update()
+			// (the global variable `now` gives the time since start in seconds)
+			// updates can be 'paused' using the spacebar
+			function update(dt) {
+				// simulation code here
+				for (let agent of agents) {
+					agent.sense = sugar.sample(agent.pos);
+					
+					if (agent.sense > agent.memory) {
+						// drift when in a good area
+						agent.movefactor = 0.01;
+						agent.turnfactor = 3.9;
+					} else {
+						// swim away when in a bad area
+						agent.movefactor = 0.5;
+						agent.turnfactor = 0.1;
+					}
+					
+					agent.memory = agent.sense;
+					agent.vel
+					.len(random() * agent.movefactor)
+					.rotate((random() - 0.5) * agent.turnfactor);
+					agent.pos.add(agent.vel.clone().mul(dt));
+					agent.pos.wrap(1);
+					
+					agent.lifetime++;
+					if (agent.depositor) {
+						if (agent.lifetime < deathCounter) sugar.update(1, agent.pos);
+					} else {
+						sugar.update(0, agent.pos);
+					}
+				}
+			}
+
+			// called to render graphics
+			// ctx is an HTML5 canvas 2D rendering context
+			// Escape key will toggle fullscreen
+			function draw(ctx) {
+				// rendering code here
+				sugar.draw();
+				
+				if (drawAgents) {
+					for (let agent of agents) {
+						draw2D.push();
+						draw2D.translate(agent.pos)
+						.rotate(agent.vel.angle())
+						.scale(agent.size);
+						draw2D.circle();
+						draw2D.color("red");
+						draw2D.circle([0.3, 0.3], 0.4 * agent.sense);
+						draw2D.circle([0.3, -0.3], 0.4 * agent.sense);
+						draw2D.pop();
+					}
+				}
+			}
+
+
+			// called when any mouse (or touch) events happen
+			// kind is the event type (down, up, move, etc.)
+			// pt is a normalized mouse coordinate
+			// id refers to any button pressed/released
+			function mouse(kind, pt, id) {
+				//
+			}
+
+			// called when any key events happen
+			// kind is the event type (down, up, etc.)
+			// key is the key (or keycode) pressed/released
+			function key(kind, key) {
+				//
+			}
+		</script>
+	</body>
+
+</html>
